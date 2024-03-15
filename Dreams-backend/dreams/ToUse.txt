@@ -49,17 +49,11 @@ app.post('/dreams', async (c) => {
 
 
 
-
-
 catch (error) {
     const message = (error as Error).message || 'Error';
     console.error('Error:', error);
     return c.json({ message }, 500);
   }
-
-
-
-
 
 
  const query = `
@@ -68,5 +62,3 @@ catch (error) {
     await c.env.DB.prepare(query).bind(
       id, title, content,
     ).run();
-
-
