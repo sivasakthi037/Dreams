@@ -1,0 +1,72 @@
+app.post('/dreams', async (c) => {
+  try {
+    // Parse request body as JSON (handle potential parsing errors)
+    const data = await c.req.json();
+    if (!data) {
+      return c.json({ message: 'Invalid request body: unable to parse JSON' }, 400);
+    }
+
+    // Destructure required fields with defaults (handle missing fields)
+    const { title = '', content = '', topics = [], selfDestructTime } = data;
+    if (!title || !content) {
+      return c.json({ message: 'Missing required fields: title and content' }, 400);
+    }
+
+    // Validate content length (handle exceeding limit)
+    if (content.length > 2048) { // Replace 2048 with your desired limit
+      return c.json({ message: 'Content exceeds maximum length of 2048 characters' }, 400);
+    }
+
+    // Sanitize topics (edge case: prevent malicious topic injection)
+    const sanitizedTopics = topics.map((topic: string) => {
+      // Implement logic to sanitize topics (e.g., remove special characters, trim whitespace)
+      return topic.trim().replace(/[^a-zA-Z0-9_-]/g, ''); // Example sanitization (replace with your logic)
+    });
+
+    const id = crypto.randomUUID(); // Or use a suitable ID generation mechanism
+
+    // Prepared statement with parameterized topics (secure)
+    const query = `
+      INSERT INTO dreams (id, title, content, topics, likes, reactions, timestamp, selfDestructTime)
+      VALUES (?, ?, ?, ?, 0, '{}', ?, ?)`;
+    await c.env.DB.prepare(query).bind([
+      id, title, content, JSON.stringify(sanitizedTopics), selfDestructTime,
+    ]).run();
+
+    return c.json({ message: 'Dream created successfully', id });
+  } catch (error) {
+    // Handle D1 specific errors (if applicable)
+    if (error instanceof error) {
+      console.error('D1 Database Error:', error.message);
+      return c.json({ message: 'Error creating dream: Database issue' }, 500);
+    } else {
+      console.error('Error creating dream:', error);
+      return c.json({ message: 'Error creating dream' }, 500);
+    }
+  }
+});
+
+
+
+
+
+
+catch (error) {
+    const message = (error as Error).message || 'Error';
+    console.error('Error:', error);
+    return c.json({ message }, 500);
+  }
+
+
+
+
+
+
+ const query = `
+      INSERT INTO dreams (id, title, content, topics, likes, timestamp, self_destruct_time, anonymous_user_id)
+      VALUES (?, ?, ?, '["there"]', 0, strftime('%s', 'now'), 9078, '')`;
+    await c.env.DB.prepare(query).bind(
+      id, title, content,
+    ).run();
+
+
